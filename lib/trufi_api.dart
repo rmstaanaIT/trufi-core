@@ -10,6 +10,7 @@ import 'package:trufi_app/trufi_models.dart';
 const String Endpoint = 'trufiapp.westeurope.cloudapp.azure.com';
 const String SearchPath = '/otp/routers/default/geocode';
 const String PlanPath = 'otp/routers/default/plan';
+const String StopsPath = 'otp/routers/default/index/stops';
 
 class FetchRequestException implements Exception {
   final Exception _innerException;
@@ -81,5 +82,20 @@ Future<http.Response> fetchRequest(Uri request) async {
     return await http.get(request);
   } catch (e) {
     throw FetchRequestException(e);
+  }
+}
+
+
+Future<Plan> fetchStops(TrufiLocation currentLocation) async {
+  Uri request = Uri.https(Endpoint, StopsPath, {
+    "lat": currentLocation.latitude.toString(),
+    "lon": currentLocation.longitude.toString(),
+    "radius": "10"
+  });
+  final response = await fetchRequest(request);
+  if (response.statusCode == 200) {
+    return compute(_parsePlan, utf8.decode(response.bodyBytes));
+  } else {
+    throw FetchResponseException('Failed to load plan');
   }
 }

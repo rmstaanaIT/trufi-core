@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:trufi_app/lines/trufi_lines_map_controller.dart';
 
 import 'package:trufi_app/location/location_form_field.dart';
 import 'package:trufi_app/location/location_provider.dart';
@@ -205,7 +206,7 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
   }
 
   Widget _buildBodyEmpty() {
-    return MapControllerPage(
+    return LinesMapController(
       yourLocation: locationProvider.location,
     );
   }
@@ -262,6 +263,34 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
       } else {
         try {
           _setPlan(await api.fetchPlan(fromPlace, toPlace));
+        } on api.FetchRequestException catch (e) {
+          print(e);
+          _setPlan(
+              Plan.fromError(TrufiLocalizations.of(context).commonNoInternet));
+        } on api.FetchResponseException catch (e) {
+          print(e);
+          _setPlan(Plan.fromError(
+              TrufiLocalizations.of(context).searchFailLoadingPlan));
+        }
+      }
+    }
+  }
+
+  _fetchNearStops() async {
+    if (toPlace != null) {
+      if (fromPlace == null) {
+        _setFromPlace(
+          TrufiLocation.fromLatLng(
+            TrufiLocalizations.of(context).searchCurrentPosition,
+            locationProvider.location,
+          ),
+        );
+      } else {
+        try {
+          _setPlan(await api.fetchStops(TrufiLocation.fromLatLng(
+            TrufiLocalizations.of(context).searchCurrentPosition,
+            locationProvider.location,
+          )));
         } on api.FetchRequestException catch (e) {
           print(e);
           _setPlan(

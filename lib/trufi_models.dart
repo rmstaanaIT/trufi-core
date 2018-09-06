@@ -231,3 +231,45 @@ class PlanItineraryLeg {
     return sb.toString();
   }
 }
+
+class Stop {
+  final String id;
+  final String name;
+  final double latitude;
+  final double longitude;
+  final StopError error;
+
+  Stop({this.id, this.name, this.latitude, this.longitude, this.error});
+
+  factory Stop.fromJson(Map<String, dynamic> json) {
+    if (json.containsKey('error')) {
+      return Stop(error: StopError.fromJson(json['error']));
+    } else {
+      Map<String, dynamic> stopJson = json['plan'];
+      return Stop(
+          id: stopJson['id'],
+          name: stopJson['name'],
+          latitude: stopJson['lat'],
+          longitude:stopJson['lon']);
+    }
+  }
+
+  factory Stop.fromError(String error) {
+    return Stop(error: StopError.fromError(error));
+  }
+}
+
+class StopError {
+  final int id;
+  final String message;
+
+  StopError(this.id, this.message);
+
+  factory StopError.fromJson(Map<String, dynamic> json) {
+    return StopError(json['id'], json['msg']);
+  }
+
+  factory StopError.fromError(String error) {
+    return StopError(-1, error);
+  }
+}
