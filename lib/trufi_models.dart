@@ -242,7 +242,7 @@ class Stop {
   Stop({this.id, this.name, this.latitude, this.longitude, this.error});
 
   factory Stop.fromJson(Map<String, dynamic> json) {
-    if (json.containsKey('error')) {
+    if (json.isEmpty) {
       return Stop(error: StopError.fromJson(json['error']));
     } else {
       Map<String, dynamic> stopJson = json['plan'];

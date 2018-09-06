@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
+import 'package:trufi_app/trufi_localizations.dart';
 
 import 'package:trufi_app/trufi_models.dart';
 import 'package:trufi_app/trufi_map_utils.dart';
+import 'package:trufi_app/trufi_api.dart' as api;
 
 typedef void OnSelected(PlanItinerary itinerary);
 
@@ -117,7 +119,27 @@ class LinesMapControllerState extends State<LinesMapController> {
   }
 
   void _handleOnNearLinesButtonTapped() {
-
+    _fetchNearStops();
   }
 
+  _fetchNearStops() async {
+    try {
+      _setMarkersStops(await api.fetchStops(TrufiLocation.fromLatLng(
+        TrufiLocalizations.of(context).searchCurrentPosition,
+        widget.yourLocation,
+      )));
+    } on api.FetchRequestException catch (e) {
+      print(e);
+      /*_setMarkersStops(
+          Stop.fromError(TrufiLocalizations.of(context).commonNoInternet));*/
+    } on api.FetchResponseException catch (e) {
+      print(e);
+     /* _setMarkersStops(Stop.fromError(
+          TrufiLocalizations.of(context).searchFailLoadingPlan));*/
+    }
+  }
+
+  void _setMarkersStops(List<Stop> stop) {
+    print("set markers");
+  }
 }

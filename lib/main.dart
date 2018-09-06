@@ -275,32 +275,4 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
       }
     }
   }
-
-  _fetchNearStops() async {
-    if (toPlace != null) {
-      if (fromPlace == null) {
-        _setFromPlace(
-          TrufiLocation.fromLatLng(
-            TrufiLocalizations.of(context).searchCurrentPosition,
-            locationProvider.location,
-          ),
-        );
-      } else {
-        try {
-          _setPlan(await api.fetchStops(TrufiLocation.fromLatLng(
-            TrufiLocalizations.of(context).searchCurrentPosition,
-            locationProvider.location,
-          )));
-        } on api.FetchRequestException catch (e) {
-          print(e);
-          _setPlan(
-              Plan.fromError(TrufiLocalizations.of(context).commonNoInternet));
-        } on api.FetchResponseException catch (e) {
-          print(e);
-          _setPlan(Plan.fromError(
-              TrufiLocalizations.of(context).searchFailLoadingPlan));
-        }
-      }
-    }
-  }
 }
