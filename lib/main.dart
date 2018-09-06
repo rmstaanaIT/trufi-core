@@ -4,21 +4,21 @@ import 'dart:io';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:latlong/latlong.dart';
+import 'package:trufi_app/blocs/bloc_provider.dart';
+import 'package:trufi_app/blocs/location_bloc.dart';
 import 'package:trufi_app/lines/trufi_lines_map_controller.dart';
-
 import 'package:trufi_app/location/location_form_field.dart';
-import 'package:trufi_app/location/location_provider.dart';
 import 'package:trufi_app/location/location_search_favorites.dart';
 import 'package:trufi_app/location/location_search_history.dart';
 import 'package:trufi_app/location/location_search_places.dart';
 import 'package:trufi_app/plan/plan_view.dart';
 import 'package:trufi_app/trufi_api.dart' as api;
 import 'package:trufi_app/trufi_localizations.dart';
-import 'package:trufi_app/trufi_map_controller.dart';
 import 'package:trufi_app/trufi_models.dart';
 
 void main() {
-  runApp(new TrufiApp());
+  runApp(BlocProvider<LocationBloc>(bloc: LocationBloc(), child: TrufiApp()));
 }
 
 class TrufiApp extends StatelessWidget {
@@ -57,7 +57,6 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
   final GlobalKey<FormFieldState<TrufiLocation>> _toFieldKey =
       GlobalKey<FormFieldState<TrufiLocation>>();
 
-  LocationProvider locationProvider;
   AnimationController controller;
   Animation<double> animation;
   TrufiLocation fromPlace;
@@ -66,7 +65,6 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
 
   initState() {
     super.initState();
-    locationProvider = LocationProvider()..init();
     controller = AnimationController(
         duration: const Duration(milliseconds: 250), vsync: this);
     animation = Tween(begin: 0.0, end: 42.0).animate(controller)
@@ -110,7 +108,6 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
   Widget _buildFormFields(BuildContext context) {
     List<Row> rows = List();
     bool swapLocationsEnabled = false;
-
     if (_isFromFieldVisible()) {
       rows.add(
         _buildFormField(_fromFieldKey,
@@ -165,7 +162,6 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
             hintText: hintText,
             onSaved: onSaved,
             initialValue: initialValue,
-            yourLocation: locationProvider.location,
           ),
         ),
         SizedBox(
@@ -185,12 +181,7 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
     return Container(
       child: error != null
           ? _buildBodyError(error)
-          : plan != null
-              ? PlanView(
-                  plan,
-                  locationProvider.location,
-                )
-              : _buildBodyEmpty(),
+          : plan != null ? PlanView(plan) : _buildBodyEmpty(),
     );
   }
 
@@ -206,12 +197,18 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
   }
 
   Widget _buildBodyEmpty() {
-    return LinesMapController(
-      yourLocation: locationProvider.location,
+    LocationBloc locationBloc = BlocProvider.of<LocationBloc>(context);
+    return StreamBuilder<LatLng>(
+      stream: locationBloc.outLocationUpdate,
+      builder: (BuildContext context, AsyncSnapshot<LatLng> snapshot) {
+        return LinesMapController(
+          initialPosition: snapshot.data,
+        );
+      },
     );
   }
 
-  _reset() {
+  void _reset() {
     _formKey.currentState.reset();
     setState(() {
       fromPlace = null;
@@ -221,14 +218,14 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
     });
   }
 
-  _setFromPlace(TrufiLocation value) {
+  void _setFromPlace(TrufiLocation value) async {
     setState(() {
       fromPlace = value;
       _fetchPlan();
     });
   }
 
-  _setToPlace(TrufiLocation value) {
+  void _setToPlace(TrufiLocation value) {
     setState(() {
       toPlace = value;
       if (toPlace != null) {
@@ -238,39 +235,42 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
     });
   }
 
-  _setPlan(Plan value) {
+  void _setPlan(Plan value) {
     setState(() {
       plan = value;
     });
   }
 
-  _swapPlaces() {
+  void _swapPlaces() {
     _toFieldKey.currentState.didChange(fromPlace);
     _fromFieldKey.currentState.didChange(toPlace);
     _toFieldKey.currentState.save();
     _fromFieldKey.currentState.save();
   }
 
-  _fetchPlan() async {
+  void _fetchPlan() async {
+    final LocationBloc locationBloc = BlocProvider.of<LocationBloc>(context);
     if (toPlace != null) {
       if (fromPlace == null) {
-        _setFromPlace(
-          TrufiLocation.fromLatLng(
-            TrufiLocalizations.of(context).searchCurrentPosition,
-            locationProvider.location,
-          ),
-        );
+        locationBloc.outLocationUpdate.first.then((location) {
+          _setFromPlace(
+            TrufiLocation.fromLatLng(
+              TrufiLocalizations.of(context).searchCurrentPosition,
+              location,
+            ),
+          );
+        });
       } else {
         try {
           _setPlan(await api.fetchPlan(fromPlace, toPlace));
         } on api.FetchRequestException catch (e) {
           print(e);
-          _setPlan(
-              Plan.fromError(TrufiLocalizations.of(context).commonNoInternet));
+          String error = TrufiLocalizations.of(context).commonNoInternet;
+          _setPlan(Plan.fromError(error));
         } on api.FetchResponseException catch (e) {
           print(e);
-          _setPlan(Plan.fromError(
-              TrufiLocalizations.of(context).searchFailLoadingPlan));
+          String error = TrufiLocalizations.of(context).searchFailLoadingPlan;
+          _setPlan(Plan.fromError(error));
         }
       }
     }

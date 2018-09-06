@@ -10,9 +10,9 @@ import 'package:trufi_app/trufi_api.dart' as api;
 typedef void OnSelected(PlanItinerary itinerary);
 
 class LinesMapController extends StatefulWidget {
-  final LatLng yourLocation;
+  final LatLng initialPosition;
 
-  LinesMapController({this.yourLocation});
+  LinesMapController({this.initialPosition});
 
   @override
   LinesMapControllerState createState() {
@@ -42,16 +42,16 @@ class LinesMapControllerState extends State<LinesMapController> {
 
     _markers.forEach((marker) => bounds.extend(marker.point));
 
-    if (widget.yourLocation != null) {
-      _markers.add(buildYourLocationMarker(widget.yourLocation));
+    if (widget.initialPosition != null) {
+      _markers.add(buildYourLocationMarker(widget.initialPosition));
     }
     if (_needsCameraUpdate && mapController.ready) {
       if (bounds.isValid) {
         mapController.fitBounds(bounds);
-      } else if (widget.yourLocation != null) {
+      } else if (widget.initialPosition != null) {
         // TODO during the initial phase this code fails - don't know why
         try {
-          mapController.move(widget.yourLocation, 15.0);
+          mapController.move(widget.initialPosition, 15.0);
         } catch (e) {}
       }
       _needsCameraUpdate = false;
@@ -110,7 +110,7 @@ class LinesMapControllerState extends State<LinesMapController> {
   }
 
   void _handleOnMyLocationButtonTapped() {
-    mapController.move(widget.yourLocation, 17.0);
+    mapController.move(widget.initialPosition, 17.0);
   }
 
   void _handleOnNearLinesButtonTapped() {
@@ -121,7 +121,7 @@ class LinesMapControllerState extends State<LinesMapController> {
     try {
       _setMarkersStops(await api.fetchStops(TrufiLocation.fromLatLng(
         TrufiLocalizations.of(context).searchCurrentPosition,
-        widget.yourLocation,
+        widget.initialPosition,
       )));
     } on api.FetchRequestException catch (e) {
       print(e);

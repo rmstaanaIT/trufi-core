@@ -9,12 +9,16 @@ typedef void OnSelected(PlanItinerary itinerary);
 
 class MapControllerPage extends StatefulWidget {
   final Plan plan;
+  final LatLng initialPosition;
   final OnSelected onSelected;
-  final LatLng yourLocation;
   final PlanItinerary selectedItinerary;
 
-  MapControllerPage(
-      {this.plan, this.onSelected, this.yourLocation, this.selectedItinerary});
+  MapControllerPage({
+    this.plan,
+    this.initialPosition,
+    this.onSelected,
+    this.selectedItinerary,
+  });
 
   @override
   MapControllerPageState createState() {
@@ -27,7 +31,8 @@ class MapControllerPageState extends State<MapControllerPage> {
   Plan _plan;
   PlanItinerary _selectedItinerary;
   Map<PlanItinerary, List<PolylineWithMarker>> _itineraries = Map();
-  List<Marker> _markers = List();
+  List<Marker> _backgroundMarkers = List();
+  List<Marker> _foregroundMarkers = List();
   List<Polyline> _polylines = List();
   List<Marker> _selectedMarkers = List();
   List<Polyline> _selectedPolylines = List();
@@ -46,17 +51,24 @@ class MapControllerPageState extends State<MapControllerPage> {
     _plan = widget.plan;
     _selectedItinerary = widget.selectedItinerary;
     _itineraries.clear();
-    _markers.clear();
+    _backgroundMarkers.clear();
+    _foregroundMarkers.clear();
     _polylines.clear();
     _selectedMarkers.clear();
     _selectedPolylines.clear();
     var bounds = LatLngBounds();
+
+    // Build markers and polylines
     if (_plan != null) {
       if (_plan.from != null) {
-        _markers.add(buildFromMarker(createLatLngWithPlanLocation(_plan.from)));
+        LatLng point = createLatLngWithPlanLocation(_plan.from);
+        _backgroundMarkers.add(buildFromMarker(point));
+        bounds.extend(point);
       }
       if (_plan.to != null) {
-        _markers.add(buildToMarker(createLatLngWithPlanLocation(_plan.to)));
+        LatLng point = createLatLngWithPlanLocation(_plan.to);
+        _foregroundMarkers.add(buildToMarker(point));
+        bounds.extend(point);
       }
       if (_plan.itineraries.isNotEmpty) {
         if (_selectedItinerary == null ||
@@ -67,43 +79,41 @@ class MapControllerPageState extends State<MapControllerPage> {
             createItineraries(_plan, _selectedItinerary, _setItinerary));
         _itineraries.forEach((itinerary, polylinesWithMarker) {
           bool isSelected = itinerary == _selectedItinerary;
-          polylinesWithMarker.forEach((pws) {
-            if (pws.marker != null) {
+          polylinesWithMarker.forEach((polylineWithMarker) {
+            if (polylineWithMarker.marker != null) {
               if (isSelected) {
-                _selectedMarkers.add(pws.marker);
+                _selectedMarkers.add(polylineWithMarker.marker);
               } else {
-                _markers.add(pws.marker);
+                _foregroundMarkers.add(polylineWithMarker.marker);
               }
+              bounds.extend(polylineWithMarker.marker.point);
             }
             if (isSelected) {
-              _selectedPolylines.add(pws.polyline);
+              _selectedPolylines.add(polylineWithMarker.polyline);
             } else {
-              _polylines.add(pws.polyline);
+              _polylines.add(polylineWithMarker.polyline);
             }
+            polylineWithMarker.polyline.points.forEach((point) {
+              bounds.extend(point);
+            });
           });
         });
       }
     }
-    _markers.forEach((marker) => bounds.extend(marker.point));
-    _polylines.forEach((polyline) {
-      polyline.points.forEach((point) {
-        bounds.extend(point);
-      });
-    });
-    if (widget.yourLocation != null) {
-      _markers.add(buildYourLocationMarker(widget.yourLocation));
+    if (widget.initialPosition != null) {
+      _foregroundMarkers.add(buildYourLocationMarker(widget.initialPosition));
     }
     if (_needsCameraUpdate && mapController.ready) {
       if (bounds.isValid) {
         mapController.fitBounds(bounds);
-      } else if (widget.yourLocation != null) {
-        // TODO during the initial phase this code fails - don't know why
-        try {
-          mapController.move(widget.yourLocation, 15.0);
-        } catch (e) {}
+        _needsCameraUpdate = false;
+      } else if (widget.initialPosition != null) {
+        mapController.move(widget.initialPosition, 15.0);
+        _needsCameraUpdate = false;
       }
-      _needsCameraUpdate = false;
     }
+
+    // Layers
     double buttonMargin = 20.0;
     double buttonPadding = 10.0;
     double buttonSize = 50.0;
@@ -117,13 +127,14 @@ class MapControllerPageState extends State<MapControllerPage> {
               zoom: 5.0,
               maxZoom: 19.0,
               minZoom: 1.0,
-              onTap: (point) => _handleOnMapTap(point),
+              onTap: _handleOnMapTap,
             ),
-            layers: [
+            layers: <LayerOptions>[
               mapBoxTileLayerOptions(),
+              MarkerLayerOptions(markers: _backgroundMarkers),
               PolylineLayerOptions(polylines: _polylines),
               PolylineLayerOptions(polylines: _selectedPolylines),
-              MarkerLayerOptions(markers: _markers),
+              MarkerLayerOptions(markers: _foregroundMarkers),
               MarkerLayerOptions(markers: _selectedMarkers),
             ],
           ),
@@ -153,14 +164,16 @@ class MapControllerPageState extends State<MapControllerPage> {
       child: Container(
         padding: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(8.0))),
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          boxShadow: <BoxShadow>[BoxShadow(blurRadius: 4.0)],
+        ),
         child: Icon(iconData),
       ),
     );
   }
 
-  _handleOnMapTap(LatLng point) {
+  void _handleOnMapTap(LatLng point) {
     Polyline polyline = polylineHitTest(_polylines, point);
     if (polyline != null) {
       _setItinerary(_itineraryForPolyline(polyline));
@@ -168,7 +181,7 @@ class MapControllerPageState extends State<MapControllerPage> {
   }
 
   void _handleOnMyLocationButtonTapped() {
-    mapController.move(widget.yourLocation, 17.0);
+    mapController.move(widget.initialPosition, 17.0);
   }
 
   void _handleOnCropButtonTapped() {
@@ -183,7 +196,7 @@ class MapControllerPageState extends State<MapControllerPage> {
     }
   }
 
-  _setItinerary(PlanItinerary value) {
+  void _setItinerary(PlanItinerary value) {
     setState(() {
       _selectedItinerary = value;
       if (widget.onSelected != null) {
