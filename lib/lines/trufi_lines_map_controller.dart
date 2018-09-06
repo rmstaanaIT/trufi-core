@@ -10,13 +10,9 @@ import 'package:trufi_app/trufi_api.dart' as api;
 typedef void OnSelected(PlanItinerary itinerary);
 
 class LinesMapController extends StatefulWidget {
-  final Plan plan;
-  final OnSelected onSelected;
   final LatLng yourLocation;
-  final PlanItinerary selectedItinerary;
 
-  LinesMapController(
-      {this.plan, this.onSelected, this.yourLocation, this.selectedItinerary});
+  LinesMapController({this.yourLocation});
 
   @override
   LinesMapControllerState createState() {
@@ -26,7 +22,6 @@ class LinesMapController extends StatefulWidget {
 
 class LinesMapControllerState extends State<LinesMapController> {
   MapController mapController;
-
   List<Stop> _stops = List();
   List<Marker> _markers = List();
   bool _needsCameraUpdate = true;
@@ -130,16 +125,17 @@ class LinesMapControllerState extends State<LinesMapController> {
       )));
     } on api.FetchRequestException catch (e) {
       print(e);
-      /*_setMarkersStops(
-          Stop.fromError(TrufiLocalizations.of(context).commonNoInternet));*/
+      //TODO: no internet
     } on api.FetchResponseException catch (e) {
       print(e);
-     /* _setMarkersStops(Stop.fromError(
-          TrufiLocalizations.of(context).searchFailLoadingPlan));*/
+     // TODO: no stops nearby
     }
   }
 
-  void _setMarkersStops(List<Stop> stop) {
+  void _setMarkersStops(List<Stop> stops) {
     print("set markers");
+    for (Stop stop in stops) {
+    _markers.add(buildMarker(LatLng(stop.latitude, stop.longitude), Icons.directions_bus, AnchorPos.center, Colors.red));
+    }
   }
 }

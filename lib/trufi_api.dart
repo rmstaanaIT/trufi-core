@@ -77,13 +77,6 @@ Plan _parsePlan(String responseBody) {
   return Plan.fromJson(json.decode(responseBody));
 }
 
-List<Stop> _parseStop(String responseBody) {
-  print(responseBody);
-  return json
-      .decode(responseBody)
-      .map<Stop>((json) => new Stop.fromJson(json));
-}
-
 Future<http.Response> fetchRequest(Uri request) async {
   try {
     return await http.get(request);
@@ -96,16 +89,21 @@ Future<List<Stop>> fetchStops(TrufiLocation currentLocation) async {
   Uri request = Uri.https(Endpoint, StopsPath, {
     "lat": currentLocation.latitude.toString(),
     "lon": currentLocation.longitude.toString(),
-    "radius": "1000"
+    "radius": "300"
   });
   print(request);
   final response = await fetchRequest(request);
   if (response.statusCode == 200) {
-    List<Stop> stops =
-    await compute(_parseStop, utf8.decode(response.bodyBytes));
-
-    return stops;
+    return await compute(_parseStop, utf8.decode(response.bodyBytes));
   } else {
-    throw FetchResponseException('Failed to load plan');
+    throw FetchResponseException('Failed to load stops nearby');
   }
+}
+
+List<Stop> _parseStop(String responseBody) {
+  print(responseBody);
+  return json
+      .decode(responseBody)
+      .map<Stop>((json) => new Stop.fromJson(json))
+      .toList();
 }
