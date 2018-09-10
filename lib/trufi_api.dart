@@ -11,6 +11,7 @@ const String Endpoint = 'trufiapp.westeurope.cloudapp.azure.com';
 const String SearchPath = '/otp/routers/default/geocode';
 const String PlanPath = 'otp/routers/default/plan';
 const String StopsPath = 'otp/routers/default/index/stops';
+const String LinesPath = 'otp/routers/default/index/stops/{stop_id}/routes';
 
 class FetchRequestException implements Exception {
   final Exception _innerException;
@@ -91,7 +92,6 @@ Future<List<Stop>> fetchStops(TrufiLocation currentLocation) async {
     "lon": currentLocation.longitude.toString(),
     "radius": "300"
   });
-  print(request);
   final response = await fetchRequest(request);
   if (response.statusCode == 200) {
     return await compute(_parseStop, utf8.decode(response.bodyBytes));
@@ -101,6 +101,26 @@ Future<List<Stop>> fetchStops(TrufiLocation currentLocation) async {
 }
 
 List<Stop> _parseStop(String responseBody) {
+  print(responseBody);
+  return json
+      .decode(responseBody)
+      .map<Stop>((json) => new Stop.fromJson(json))
+      .toList();
+}
+
+Future<List<String>> fetchRoutes(Stop stop) async {
+  String linesPathWithStopId = LinesPath.replaceAll('{stop_id}', stop.id);
+  Uri request = Uri.https(Endpoint, linesPathWithStopId);
+  print(request);
+  final response = await fetchRequest(request);
+  if (response.statusCode == 200) {
+    return await compute(_parseRoute, utf8.decode(response.bodyBytes));
+  } else {
+    throw FetchResponseException('Failed to load routes nearby');
+  }
+}
+
+List<String> _parseRoute(String responseBody) {
   print(responseBody);
   return json
       .decode(responseBody)

@@ -9,6 +9,7 @@ import 'package:trufi_app/blocs/bloc_provider.dart';
 import 'package:trufi_app/blocs/location_bloc.dart';
 import 'package:trufi_app/lines/trufi_lines_map_controller.dart';
 import 'package:trufi_app/location/location_form_field.dart';
+import 'package:trufi_app/location/location_map_controller.dart';
 import 'package:trufi_app/location/location_search_favorites.dart';
 import 'package:trufi_app/location/location_search_history.dart';
 import 'package:trufi_app/location/location_search_places.dart';
@@ -200,6 +201,7 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
     LocationBloc locationBloc = BlocProvider.of<LocationBloc>(context);
     return StreamBuilder<LatLng>(
       stream: locationBloc.outLocationUpdate,
+      initialData: LatLng(-17.4603761, -66.1860606),
       builder: (BuildContext context, AsyncSnapshot<LatLng> snapshot) {
         return LinesMapController(
           initialPosition: snapshot.data,
@@ -207,7 +209,6 @@ class _TrufiAppHomeState extends State<TrufiAppHome>
       },
     );
   }
-
   void _reset() {
     _formKey.currentState.reset();
     setState(() {

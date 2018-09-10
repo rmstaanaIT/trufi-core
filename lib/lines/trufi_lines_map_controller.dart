@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
@@ -6,8 +8,6 @@ import 'package:trufi_app/trufi_localizations.dart';
 import 'package:trufi_app/trufi_models.dart';
 import 'package:trufi_app/trufi_map_utils.dart';
 import 'package:trufi_app/trufi_api.dart' as api;
-
-typedef void OnSelected(PlanItinerary itinerary);
 
 class LinesMapController extends StatefulWidget {
   final LatLng initialPosition;
@@ -22,9 +22,11 @@ class LinesMapController extends StatefulWidget {
 
 class LinesMapControllerState extends State<LinesMapController> {
   MapController mapController;
-  List<Stop> _stops = List();
   List<Marker> _markers = List();
-  bool _needsCameraUpdate = true;
+  List<Marker> _lineMarker = List();
+  List<Stop> _stops = List();
+  bool _showLinesNearby = false;
+  Map<Stop, bool> _showNameForStop = Map();
 
   void initState() {
     super.initState();
@@ -35,27 +37,31 @@ class LinesMapControllerState extends State<LinesMapController> {
   }
 
   Widget build(BuildContext context) {
-    _needsCameraUpdate = _needsCameraUpdate;
     _markers.clear();
+    _lineMarker.clear();
+
+    if (_showLinesNearby == true) {
+      for (Stop stop in _stops) {
+        _markers.add(buildLineMarker(
+            LatLng(stop.latitude, stop.longitude), Colors.black,
+            onTap: () => _showName(stop)));
+
+        _showNameForStop.forEach((stop, showName) {
+          if (showName) {
+            _lineMarker
+                .add(_buildMarkerName(stop, onTap: () => _removeName(stop)));
+          }
+        });
+      }
+    }
 
     var bounds = LatLngBounds();
-
     _markers.forEach((marker) => bounds.extend(marker.point));
 
     if (widget.initialPosition != null) {
       _markers.add(buildYourLocationMarker(widget.initialPosition));
     }
-    if (_needsCameraUpdate && mapController.ready) {
-      if (bounds.isValid) {
-        mapController.fitBounds(bounds);
-      } else if (widget.initialPosition != null) {
-        // TODO during the initial phase this code fails - don't know why
-        try {
-          mapController.move(widget.initialPosition, 15.0);
-        } catch (e) {}
-      }
-      _needsCameraUpdate = false;
-    }
+
     double buttonMargin = 20.0;
     double buttonPadding = 10.0;
     double buttonSize = 50.0;
@@ -73,24 +79,25 @@ class LinesMapControllerState extends State<LinesMapController> {
             layers: [
               mapBoxTileLayerOptions(),
               MarkerLayerOptions(markers: _markers),
+              MarkerLayerOptions(markers: _lineMarker),
             ],
           ),
         ),
         Positioned(
-          top: buttonMargin ,
+          top: buttonMargin,
           right: buttonMargin,
           width: buttonSize,
           height: buttonSize,
           child:
-          _buildButton(Icons.my_location, _handleOnMyLocationButtonTapped),
+              _buildButton(Icons.my_location, _handleOnMyLocationButtonTapped),
         ),
         Positioned(
           top: buttonMargin + buttonPadding + buttonSize,
           right: buttonMargin,
           width: buttonSize,
           height: buttonSize,
-          child:
-          _buildButton(Icons.airport_shuttle, _handleOnNearLinesButtonTapped),
+          child: _buildButton(
+              Icons.airport_shuttle, _handleOnNearLinesButtonTapped),
         ),
       ],
     );
@@ -114,12 +121,12 @@ class LinesMapControllerState extends State<LinesMapController> {
   }
 
   void _handleOnNearLinesButtonTapped() {
-    _fetchNearStops();
+    _toggleShowLinesNearBy();
   }
 
-  _fetchNearStops() async {
+  void _fetchNearStops() async {
     try {
-      _setMarkersStops(await api.fetchStops(TrufiLocation.fromLatLng(
+      _setStops(await api.fetchStops(TrufiLocation.fromLatLng(
         TrufiLocalizations.of(context).searchCurrentPosition,
         widget.initialPosition,
       )));
@@ -128,14 +135,89 @@ class LinesMapControllerState extends State<LinesMapController> {
       //TODO: no internet
     } on api.FetchResponseException catch (e) {
       print(e);
-     // TODO: no stops nearby
+      // TODO: no stops nearby
     }
   }
 
-  void _setMarkersStops(List<Stop> stops) {
-    print("set markers");
-    for (Stop stop in stops) {
-    _markers.add(buildMarker(LatLng(stop.latitude, stop.longitude), Icons.directions_bus, AnchorPos.center, Colors.red));
-    }
+  void _setStops(List<Stop> stops) {
+    setState(() {
+      _stops = stops;
+    });
   }
+
+  void _toggleShowLinesNearBy() {
+    setState(() {
+      _showLinesNearby = !_showLinesNearby;
+      if (_showLinesNearby == true) {
+        _fetchNearStops();
+      }
+    });
+  }
+
+  void _showName(Stop stop) {
+    setState(() {
+      _showNameForStop.clear();
+      _showNameForStop.addAll({stop: true});
+    });
+  }
+
+  void _removeName(Stop stop) {
+    setState(() {
+      _showNameForStop.clear();
+    });
+  }
+}
+
+Marker buildLineMarker(LatLng point, Color color, {Function onTap}) {
+  return new Marker(
+    width: 30.0,
+    height: 30.0,
+    point: point,
+    anchor: AnchorPos.center,
+    builder: (context) => GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.all(4.0),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.directions_bus,
+                    color: color,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+  );
+}
+
+Marker _buildMarkerName(Stop stop, {Function onTap}) {
+  LatLng point = LatLng(stop.latitude, stop.longitude);
+  return new Marker(
+    width: 40.0,
+    height: 40.0,
+    point: point,
+    anchor: AnchorPos.center,
+    builder: (context) => GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: Colors.deepOrangeAccent,
+              borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                children: <Widget>[
+                  Text(stop.name, style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+          ),
+        ),
+  );
 }
