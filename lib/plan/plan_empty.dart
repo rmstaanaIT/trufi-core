@@ -27,7 +27,6 @@ class PlanEmptyPageState extends State<PlanEmptyPage> {
         key: ValueKey("PlanEmptyMap"),
         isOnline: widget.isOnline,
         controller: _trufiOnAndOfflineMapController,
-        center: widget.initialPosition,
         layerOptionsBuilder: (context) {
           return <LayerOptions>[
             _trufiOnAndOfflineMapController.yourLocationLayer,
