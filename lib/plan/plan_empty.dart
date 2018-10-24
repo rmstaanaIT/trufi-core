@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
+import 'package:trufi_app/blocs/preferences_bloc.dart';
+import 'package:trufi_app/composite_subscription.dart';
 
 import 'package:trufi_app/widgets/trufi_map.dart';
 
 class PlanEmptyPage extends StatefulWidget {
-  PlanEmptyPage({this.initialPosition});
+  PlanEmptyPage(this.isOnline, {this.initialPosition});
 
+  final bool isOnline;
   final LatLng initialPosition;
 
   @override
@@ -18,10 +21,13 @@ class PlanEmptyPageState extends State<PlanEmptyPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Stack(children: <Widget>[
       TrufiOnAndOfflineMap(
         key: ValueKey("PlanEmptyMap"),
+        isOnline: widget.isOnline,
         controller: _trufiOnAndOfflineMapController,
+        center: widget.initialPosition,
         layerOptionsBuilder: (context) {
           return <LayerOptions>[
             _trufiOnAndOfflineMapController.yourLocationLayer,

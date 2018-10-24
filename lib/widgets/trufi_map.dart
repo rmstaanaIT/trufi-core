@@ -59,6 +59,7 @@ class TrufiOnAndOfflineMapController {
 class TrufiOnAndOfflineMap extends StatefulWidget {
   TrufiOnAndOfflineMap({
     Key key,
+    @required this.isOnline,
     @required this.controller,
     @required this.layerOptionsBuilder,
     this.onTap,
@@ -68,6 +69,7 @@ class TrufiOnAndOfflineMap extends StatefulWidget {
   final TrufiOnAndOfflineMapController controller;
   final LayerOptionsBuilder layerOptionsBuilder;
   final TapCallback onTap;
+  final bool isOnline;
   final PositionCallback onPositionChanged;
 
   @override
@@ -75,32 +77,21 @@ class TrufiOnAndOfflineMap extends StatefulWidget {
 }
 
 class TrufiOnAndOfflineMapState extends State<TrufiOnAndOfflineMap> {
-  final _subscriptions = CompositeSubscription();
-
-  bool _online = false;
 
   @override
   void initState() {
     super.initState();
     widget.controller.state = this;
-    _subscriptions.add(
-      PreferencesBloc.of(context).outChangeOnline.listen((online) {
-        setState(() {
-          _online = online;
-        });
-      }),
-    );
   }
 
   @override
   void dispose() {
-    _subscriptions.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return _online ? _buildOnlineMap() : _buildOfflineMap();
+    return widget.isOnline ? _buildOnlineMap() : _buildOfflineMap();
   }
 
   Widget _buildOnlineMap() {
@@ -155,7 +146,7 @@ class TrufiOnAndOfflineMapState extends State<TrufiOnAndOfflineMap> {
 
   // Getter
 
-  bool get isOnline => _online;
+  bool get isOnline => widget.isOnline;
 }
 
 class TrufiMapController {

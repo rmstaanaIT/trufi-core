@@ -13,8 +13,9 @@ import 'package:trufi_app/widgets/your_location_button.dart';
 typedef void OnSelected(PlanItinerary itinerary);
 
 class PlanMapPage extends StatefulWidget {
-  PlanMapPage({this.planPageController});
+  PlanMapPage(this.isOnline, {this.planPageController});
 
+  final bool isOnline;
   final PlanPageController planPageController;
 
   @override
@@ -72,6 +73,7 @@ class PlanMapPageState extends State<PlanMapPage> {
       children: <Widget>[
         TrufiOnAndOfflineMap(
           key: ValueKey("PlanMap"),
+          isOnline: widget.isOnline,
           controller: _trufiOnAndOfflineMapController,
           onTap: _handleOnMapTap,
           onPositionChanged: _handleOnMapPositionChanged,

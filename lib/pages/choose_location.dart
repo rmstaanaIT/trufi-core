@@ -94,6 +94,7 @@ class ChooseLocationPageState extends State<ChooseLocationPage> {
 
   Widget _buildBody(BuildContext context) {
     return TrufiOnAndOfflineMap(
+      isOnline: true,
       controller: _trufiOnAndOfflineMapController,
       onPositionChanged: _handleOnMapPositionChanged,
       layerOptionsBuilder: (context) {
