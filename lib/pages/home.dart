@@ -34,7 +34,6 @@ class HomePageState extends State<HomePage>
   final _subscriptions = CompositeSubscription();
 
   bool _isFetching = false;
-  bool _isOnline = false;
 
   @override
   initState() {
@@ -42,7 +41,6 @@ class HomePageState extends State<HomePage>
     PreferencesBloc preferencesBloc = PreferencesBloc.of(context);
     _subscriptions.add(
       preferencesBloc.outChangeOnline.listen((online) {
-        _isOnline = online;
         if (_data.plan == null) {
           _fetchPlan();
         }
@@ -178,8 +176,8 @@ class HomePageState extends State<HomePage>
   Widget _buildBody(BuildContext context) {
     Widget body = Container(
       child: _data.plan != null && _data.plan.error == null
-          ? PlanPage(_isOnline, _data.plan)
-          : PlanEmptyPage(_isOnline),
+          ? PlanPage(_data.plan)
+          : PlanEmptyPage(),
     );
     if (_isFetching) {
       return Stack(

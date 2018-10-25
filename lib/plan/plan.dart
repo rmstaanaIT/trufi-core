@@ -42,9 +42,8 @@ class PlanPageController {
 
 class PlanPage extends StatefulWidget {
   final Plan plan;
-  final bool isOnline;
 
-  PlanPage(this.isOnline, this.plan) : assert(plan != null);
+  PlanPage(this.plan) : assert(plan != null);
 
   @override
   PlanPageState createState() => PlanPageState();
@@ -109,7 +108,7 @@ class PlanPageState extends State<PlanPage> with TickerProviderStateMixin {
         Column(
           children: <Widget>[
             Expanded(
-              child: PlanMapPage(widget.isOnline, planPageController: _planPageController),
+              child: PlanMapPage(planPageController: _planPageController),
             ),
             VisibleWidget(
               visibility: _visibleFlag,
