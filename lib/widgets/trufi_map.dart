@@ -94,6 +94,7 @@ class TrufiOnAndOfflineMapState extends State<TrufiOnAndOfflineMap> {
 
   @override
   void dispose() {
+    _subscriptions.cancel();
     super.dispose();
   }
 
