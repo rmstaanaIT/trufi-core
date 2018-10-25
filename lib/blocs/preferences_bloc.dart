@@ -68,10 +68,6 @@ class PreferencesBloc extends BlocBase {
     return _changeOnlineController.stream;
   }
 
-  // Getter
-
-  bool get isOnline  => _preferences?.getBool(propertyOnlineKey);
-
   // Dispose
 
   @override
