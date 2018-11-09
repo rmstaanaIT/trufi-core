@@ -85,7 +85,10 @@ class TrufiDrawerState extends State<TrufiDrawer> {
         ),
         selected: isSelected,
         onTap: () {
-          Navigator.pushReplacementNamed(context, route);
+          Navigator.popUntil(context, ModalRoute.withName(HomePage.route));
+          if (route != HomePage.route) {
+            Navigator.pushNamed(context, route);
+          }
         },
       ),
     );
@@ -97,10 +100,10 @@ class TrufiDrawerState extends State<TrufiDrawer> {
     final localizations = TrufiLocalizations.of(context);
     final languageCode = localizations.locale.languageCode;
     final values = <LanguageDropdownValue>[
-      LanguageDropdownValue(languageCodeSpanish, localizations.spanish),
-      LanguageDropdownValue(languageCodeQuechua, localizations.quechua),
-      LanguageDropdownValue(languageCodeEnglish, localizations.english),
-      LanguageDropdownValue(languageCodeGerman, localizations.german),
+      LanguageDropdownValue("es", "Español"),
+      LanguageDropdownValue("qu", "Quechua simi"),
+      LanguageDropdownValue("en", "English"),
+      LanguageDropdownValue("de", "Deutsch"),
     ];
     return ListTile(
       leading: Icon(Icons.language),
@@ -140,6 +143,23 @@ class TrufiDrawerState extends State<TrufiDrawer> {
         );
       },
     );
+  }
+}
+
+class TrufiDrawerRoute<T> extends MaterialPageRoute<T> {
+  TrufiDrawerRoute({
+    WidgetBuilder builder,
+    RouteSettings settings,
+  }) : super(builder: builder, settings: settings);
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child;
   }
 }
 

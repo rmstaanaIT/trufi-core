@@ -242,6 +242,7 @@ class _SuggestionList extends StatelessWidget {
             ),
           );
         }
+
         // No results
         int count = snapshot.data.length > 0 ? snapshot.data.length + 1 : 0;
         if (count == 0 && isVisibleWhenEmpty) {

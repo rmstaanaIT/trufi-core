@@ -9,6 +9,7 @@ class TrufiLocation {
     @required this.description,
     @required this.latitude,
     @required this.longitude,
+    this.importance,
   })  : assert(description != null),
         assert(latitude != null),
         assert(longitude != null);
@@ -16,10 +17,14 @@ class TrufiLocation {
   static const String _Description = 'description';
   static const String _Latitude = 'latitude';
   static const String _Longitude = 'longitude';
+  static const String _Importance = 'importance';
 
   final String description;
   final double latitude;
   final double longitude;
+  final num importance;
+
+  int tempLevenshteinDistance = 100;
 
   factory TrufiLocation.fromLatLng(String description, LatLng point) {
     return TrufiLocation(
@@ -29,19 +34,12 @@ class TrufiLocation {
     );
   }
 
-  factory TrufiLocation.fromSearchJson(Map<String, dynamic> json) {
-    return TrufiLocation(
-      description: json['description'],
-      latitude: json['lat'],
-      longitude: json['lng'],
-    );
-  }
-
-  factory TrufiLocation.fromImportantPlacesJson(Map<String, dynamic> json) {
+  factory TrufiLocation.fromLocationsJson(Map<String, dynamic> json) {
     return TrufiLocation(
       description: json['name'],
       latitude: json['coords']['lat'],
       longitude: json['coords']['lng'],
+      importance: json['importance'],
     );
   }
 
@@ -61,6 +59,7 @@ class TrufiLocation {
       description: json[_Description],
       latitude: json[_Latitude],
       longitude: json[_Longitude],
+      importance: json[_Importance],
     );
   }
 
@@ -69,6 +68,7 @@ class TrufiLocation {
       _Description: description,
       _Latitude: latitude,
       _Longitude: longitude,
+      _Importance: importance,
     };
   }
 
