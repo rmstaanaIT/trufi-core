@@ -55,6 +55,15 @@ Widget _buildOnAndOfflineButton(BuildContext context, bool online) {
   );
 }
 
+Future buildFetchingLoadingDialog({BuildContext context}) {
+  return showDialog(
+    context: context,
+    barrierDismissible: false,//should be dismiss only when the fetching is over
+    builder: (BuildContext context) =>
+        Center(child: CircularProgressIndicator()),
+  );
+}
+
 Widget _buildAlert({
   @required BuildContext context,
   String title,

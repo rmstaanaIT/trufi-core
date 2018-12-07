@@ -33,8 +33,6 @@ class HomePageState extends State<HomePage>
   final _toFieldKey = GlobalKey<FormFieldState<TrufiLocation>>();
   final _subscriptions = CompositeSubscription();
 
-  bool _isFetching = false;
-
   @override
   initState() {
     super.initState();
@@ -178,23 +176,7 @@ class HomePageState extends State<HomePage>
           ? PlanPage(_data.plan)
           : PlanEmptyPage(),
     );
-    if (_isFetching) {
-      return Stack(
-        children: <Widget>[
-          Positioned.fill(child: body),
-          Positioned.fill(
-            child: Container(
-              color: Colors.black54,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          ),
-        ],
-      );
-    } else {
-      return body;
-    }
+    return body;
   }
 
   void _reset() {
@@ -266,13 +248,14 @@ class HomePageState extends State<HomePage>
     final requestManagerBloc = RequestManagerBloc.of(context);
     final localizations = TrufiLocalizations.of(context);
     if (_data.toPlace != null && _data.fromPlace != null) {
-      setState(() => _isFetching = true);
+      _showFetchingLoadingDialog();
       try {
         Plan plan = await requestManagerBloc.fetchPlan(
           context,
           _data.fromPlace,
           _data.toPlace,
         );
+        Navigator.pop(context);//close FetchingLoadingAler
         if (plan.hasError) {
           _showErrorAlert(plan.error.message);
         } else {
@@ -298,9 +281,13 @@ class HomePageState extends State<HomePage>
         _showOnAndOfflineErrorAlert(localizations.searchFailLoadingPlan, true);
       } catch (e) {
         print("Failed to fetch plan: $e");
+        Navigator.pop(context);//close FetchingLoadingAler
       }
-      setState(() => _isFetching = false);
     }
+  }
+
+  void _showFetchingLoadingDialog() {
+    buildFetchingLoadingDialog(context: context);
   }
 
   void _showErrorAlert(String error) {
