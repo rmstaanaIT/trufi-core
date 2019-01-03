@@ -10,6 +10,7 @@ class LocationFormField extends FormField<TrufiLocation> {
     FormFieldSetter<TrufiLocation> onSaved,
     String hintText,
     String searchHintText,
+    bool Function() isFetching,
   }) : super(
           key: key,
           onSaved: onSaved,
@@ -23,18 +24,21 @@ class LocationFormField extends FormField<TrufiLocation> {
               padding: EdgeInsets.all(4.0),
               child: GestureDetector(
                 onTap: () async {
-                  TrufiMaterialLocalizations materialLocalizations =
-                      TrufiMaterialLocalizations.of(state.context);
-                  materialLocalizations.setSearchHintText(searchHintText);
-                  TrufiLocation location = await showSearch(
-                    context: state.context,
-                    delegate: LocationSearchDelegate(
-                      currentLocation: state.value,
-                    ),
-                  );
-                  if (location != null) {
-                    state.didChange(location);
-                    state.save();
+                  if (!isFetching()) {
+                    // search function should only works if it is not fetching
+                    TrufiMaterialLocalizations materialLocalizations =
+                        TrufiMaterialLocalizations.of(state.context);
+                    materialLocalizations.setSearchHintText(searchHintText);
+                    TrufiLocation location = await showSearch(
+                      context: state.context,
+                      delegate: LocationSearchDelegate(
+                        currentLocation: state.value,
+                      ),
+                    );
+                    if (location != null) {
+                      state.didChange(location);
+                      state.save();
+                    }
                   }
                 },
                 child: Container(

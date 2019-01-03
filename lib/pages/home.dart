@@ -139,6 +139,8 @@ class HomePageState extends State<HomePage>
     );
   }
 
+  bool isFetching() => _isFetching;
+
   Widget _buildFormField(
     Key key,
     ValueKey<String> valueKey,
@@ -162,6 +164,7 @@ class HomePageState extends State<HomePage>
             hintText: hintText,
             onSaved: onSaved,
             searchHintText: searchHintText,
+            isFetching: isFetching,
           ),
         ),
         SizedBox(
@@ -198,11 +201,14 @@ class HomePageState extends State<HomePage>
   }
 
   void _reset() {
-    setState(() {
-      _data.reset(context);
-      _formKey.currentState.reset();
-      _setFromPlaceToCurrentPosition();
-    });
+    if (!_isFetching) {
+      // reset function should only works if it is not fetching
+      setState(() {
+        _data.reset(context);
+        _formKey.currentState.reset();
+        _setFromPlaceToCurrentPosition();
+      });
+    }
   }
 
   void _setPlaces(TrufiLocation fromPlace, TrufiLocation toPlace) {
@@ -259,7 +265,10 @@ class HomePageState extends State<HomePage>
   }
 
   void _swapPlaces() {
-    _setPlaces(_data.toPlace, _data.fromPlace);
+    if (!_isFetching) {
+      // swap places function should only works if it is not fetching
+      _setPlaces(_data.toPlace, _data.fromPlace);
+    }
   }
 
   void _fetchPlan() async {
