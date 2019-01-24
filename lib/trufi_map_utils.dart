@@ -39,7 +39,7 @@ tileHostingTileLayerOptions() {
 Marker buildFromMarker(LatLng point) {
   return Marker(
     point: point,
-    anchorPos: AnchorPos.align(AnchorAlign.top),
+    anchorPos: AnchorPos.align(AnchorAlign.center),
     builder: (context) {
       return Container(
         child: SvgPicture.asset(

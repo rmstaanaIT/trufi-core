@@ -187,10 +187,17 @@ class HomePageState extends State<HomePage>
   }
 
   Widget _buildBody(BuildContext context) {
+    LatLng initialPosition;
+    if (_data.fromPlace != null && _data.fromPlace != null) {
+      initialPosition = LatLng(
+        _data.fromPlace.latitude,
+        _data.fromPlace.longitude,
+      );
+    }
     Widget body = Container(
       child: _data.plan != null && _data.plan.error == null
           ? PlanPage(_data.plan)
-          : PlanEmptyPage(),
+          : PlanEmptyPage(initialPosition: initialPosition),
     );
     if (_isFetching) {
       return Stack(
