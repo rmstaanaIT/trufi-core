@@ -12,7 +12,7 @@ import 'package:trufi_app/trufi_localizations.dart';
 import 'package:trufi_app/trufi_models.dart';
 
 class OnlineRequestManager implements RequestManager {
-  static const String endpoint = 'api.trufi.app';
+  static const String endpoint = 'trufiapp.westeurope.cloudapp.azure.com:8090';
   static const String searchPath = '/otp/routers/default/geocode';
   static const String planPath = 'otp/routers/default/plan';
 
@@ -80,12 +80,13 @@ class OnlineRequestManager implements RequestManager {
     TrufiLocation to,
     String mode,
   ) async {
-    Uri request = Uri.https(endpoint, planPath, {
+    Uri request = Uri.http(endpoint, planPath, {
       "fromPlace": from.toString(),
       "toPlace": to.toString(),
       "date": "01-01-2018",
       "mode": mode
     });
+    print(request);
     final response = await _fetchRequest(request);
     if (response.statusCode == 200) {
       return await compute(_parsePlan, utf8.decode(response.bodyBytes));

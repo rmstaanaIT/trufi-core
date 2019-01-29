@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 
 import 'package:trufi_app/trufi_localizations.dart';
+import 'package:trufi_app/trufi_map_utils.dart';
 
 class TrufiLocation {
   TrufiLocation({
@@ -415,6 +416,8 @@ class PlanItineraryLeg {
                     ? Icons.directions_bus
                     : carType.contains('minibus')
                         ? Icons.airport_shuttle
-                        : Icons.directions_bus;
+                        : carType.contains('gondola')
+                            ? GondolaIcon.gondola
+                            : Icons.directions_bus;
   }
 }
