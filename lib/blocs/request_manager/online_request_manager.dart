@@ -21,7 +21,7 @@ class OnlineRequestManager implements RequestManager {
     String query,
     int limit,
   ) async {
-    Uri request = Uri.https(urlOtpEndpoint, searchPath, {
+    Uri request = Uri.http(urlOtpEndpoint, searchPath, {
       "query": query,
       "autocomplete": "false",
       "corners": "true",
@@ -90,10 +90,10 @@ class OnlineRequestManager implements RequestManager {
     TrufiLocation to,
     String mode,
   ) async {
-    Uri request = Uri.https(urlOtpEndpoint, planPath, {
+    Uri request = Uri.http(urlOtpEndpoint, planPath, {
       "fromPlace": from.toString(),
       "toPlace": to.toString(),
-      "date": "01-01-2018",
+      "date": "04.03.2019",
       "numItineraries":"5",
       "mode": mode
     });
