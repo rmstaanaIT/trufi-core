@@ -31,7 +31,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.trufi.navigator"
+        applicationId "app.beta.trotro"
         minSdkVersion 16
         targetSdkVersion 28
         versionCode 11
