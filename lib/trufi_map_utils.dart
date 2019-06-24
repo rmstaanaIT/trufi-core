@@ -20,7 +20,7 @@ openStreetMapTileLayerOptions() {
 
 offlineMapTileLayerOptions() {
   return TileLayerOptions(
-    offlineMode: true,
+    // offlineMode: true,
     maxZoom: 18.0,
     urlTemplate: "assets/tiles/{z}/{z}-{x}-{y}.png",
   );

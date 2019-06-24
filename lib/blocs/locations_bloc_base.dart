@@ -28,7 +28,7 @@ abstract class LocationsBlocBase implements BlocBase {
 
   // Locations
   final _locationsController = BehaviorSubject<List<TrufiLocation>>(
-    seedValue: [],
+    // seedValue: [],
   );
 
   Sink<List<TrufiLocation>> get _inLocations => _locationsController.sink;

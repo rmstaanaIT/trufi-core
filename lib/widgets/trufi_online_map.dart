@@ -52,10 +52,10 @@ class TrufiOnlineMapState extends State<TrufiOnlineMap> {
     );
   }
 
-  void _handleOnPositionChanged(MapPosition position, bool hasGesture) {
+  void _handleOnPositionChanged(MapPosition position, bool hasGesture, bool secondValue) {
     if (widget.onPositionChanged != null) {
       Future.delayed(Duration.zero, () {
-        widget.onPositionChanged(position, hasGesture);
+        widget.onPositionChanged(position, hasGesture, secondValue);
       });
     }
   }

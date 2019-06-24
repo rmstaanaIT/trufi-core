@@ -121,7 +121,7 @@ class PlanMapPageState extends State<PlanMapPage>
     }
   }
 
-  void _handleOnMapPositionChanged(MapPosition position, bool hasGesture) {
+  void _handleOnMapPositionChanged(MapPosition position, bool hasGesture,bool) {
     if (_data.selectedBounds != null && _data.selectedBounds.isValid) {
       _cropButtonKey.currentState.setVisible(
         !position.bounds.containsBounds(_data.selectedBounds),

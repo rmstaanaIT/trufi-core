@@ -6,7 +6,7 @@ import 'package:latlong/latlong.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:trufi_app/blocs/bloc_provider.dart';
-import 'package:trufi_app/composite_subscription.dart';
+import 'package:trufi_app/composite_subscription.dart' as composite_subscription;
 
 class LocationProviderBloc implements BlocBase {
   static LocationProviderBloc of(BuildContext context) {
@@ -75,7 +75,7 @@ class LocationProvider {
 
   final ValueChanged<LatLng> onLocationChanged;
 
-  final CompositeSubscription _subscriptions = CompositeSubscription();
+  final composite_subscription.CompositeSubscription _subscriptions = composite_subscription.CompositeSubscription();
   final Geolocator _geolocator = Geolocator();
   final LocationOptions _locationOptions = LocationOptions(
     accuracy: LocationAccuracy.high,
