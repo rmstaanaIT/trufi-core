@@ -2,7 +2,7 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
-import 'package:trufi_app/composite_subscription.dart';
+import 'package:trufi_app/composite_subscription.dart' as composite_subscription;
 import 'package:trufi_app/plan/plan_itinerary_tabs.dart';
 import 'package:trufi_app/plan/plan_map.dart';
 import 'package:trufi_app/trufi_models.dart';
@@ -19,7 +19,7 @@ class PlanPageController {
   final Plan plan;
 
   final _selectedItineraryController = BehaviorSubject<PlanItinerary>();
-  final _subscriptions = CompositeSubscription();
+  final _subscriptions = composite_subscription.CompositeSubscription();
 
   PlanItinerary _selectedItinerary;
 

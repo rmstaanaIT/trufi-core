@@ -1,13 +1,14 @@
 name: trufi_app
 description: Trufi App
-
+environment:
+  sdk: ">=2.1.0 <3.0.0"
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
 
-  flutter_map: 0.5.6
+  flutter_map: ^0.6.1+2
   #flutter_map:
   #  git:
   #    url: git@github.com:ubilabs/flutter_map.git
@@ -19,15 +20,15 @@ dependencies:
   cupertino_icons: 0.1.2
   diff_match_patch: 0.3.0
   flare_flutter: 1.5.4
-  flutter_compass: 0.0.3
+  flutter_compass: ^0.3.2
   flutter_svg: 0.13.1
-  geolocator: 2.0.1
-  google_api_availability: 1.0.4
+  geolocator: ^5.0.1
+  google_api_availability: ^2.0.1
   http: 0.12.0
   mockito: 3.0.0
-  path_provider: 1.1.0
-  permission_handler: 2.1.2
-  rxdart: 0.18.1
+  # path_provider: 1.1.0
+  permission_handler: ^3.1.0
+  # rxdart: 0.18.1
   shared_preferences: 0.4.3
   sprintf: 4.0.0
   synchronized: 2.0.2

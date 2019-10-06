@@ -7,7 +7,7 @@ import 'package:latlong/latlong.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:trufi_app/blocs/preferences_bloc.dart';
-import 'package:trufi_app/composite_subscription.dart';
+import 'package:trufi_app/composite_subscription.dart' as composite_subscription;
 import 'package:trufi_app/trufi_map_utils.dart';
 import 'package:trufi_app/widgets/trufi_map.dart';
 
@@ -83,7 +83,7 @@ class TrufiOnAndOfflineMap extends StatefulWidget {
 }
 
 class TrufiOnAndOfflineMapState extends State<TrufiOnAndOfflineMap> {
-  final _subscriptions = CompositeSubscription();
+  final _subscriptions = composite_subscription.CompositeSubscription();
 
   bool _online = false;
 
