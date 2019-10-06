@@ -18,6 +18,7 @@ import 'package:trufi_app/trufi_localizations.dart';
 import 'package:trufi_app/widgets/trufi_drawer.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await GlobalConfiguration().loadFromAsset("app_config");
   runApp(TrufiApp());
 }
